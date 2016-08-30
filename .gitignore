@@ -3,6 +3,4 @@
 *.csv
 *.xml
 *.xsl
-*.sqlite
-xmldroid.py
 
