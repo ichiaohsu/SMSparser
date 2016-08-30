@@ -27,25 +27,23 @@ class smsparser(object):
 	def readcsv(self,csvname):
 		print 'readcsv: ' + csvname
 		if len(csvname) > 1:
-			rf = open(csvname,'rb')
+			self.rf = open(csvname,'rb')
 		else:
 			print "invalid file name"
 			exit(0)
 
-		for row in csv.DictReader(rf,["sms","type","rcv_number","snt_number","","date/time","group","message"]):
+	def parsecsv(self):
+
+		for row in csv.DictReader(self.rf,["sms","type","rcv_number","snt_number","","date/time","group","message"]):
 
 			# Decide message type
 			if row["type"] == "deliver":
-				#print row['rcv_number']
 				phone_number = self.checkphone(row['rcv_number'])
-				#msg_type = "Received"
-				#phone_number = row["rcv_number"]
 			elif row["type"] == "submit":
 				print row['snt_number']
 				phone_number = self.checkphone(row['snt_number'])
-				#msg_type = "Sent"
-				#phone_number = row["snt_number"]
 			print phone_number
+
 			# from csv string to datetime obj
 			date_object = datetime.strptime(row["date/time"], '%Y.%m.%d %H:%M')
 			#date_str = datetime.strftime(date_object,'%m月%d, %Y %H:%M')
@@ -57,8 +55,9 @@ class smsparser(object):
 
 			# Create timestamp for sent time and receive time in ms
 			sent_time = int( time.mktime( date_object.timetuple() ) )*1000
-			receive_time = sent_time + 100
+			receive_time = sent_time + 1000
 			print "sent: ", sent_time, ", receive: ", receive_time
+
 			#thread_id = 295
 			#data = [
 			#	[date_str,phone_number,phone_number,msg_type,row["message"],str(thread_id),"null",str(sent_time),str(receive_time),
