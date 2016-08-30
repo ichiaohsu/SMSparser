@@ -14,7 +14,7 @@ class smsparser(object):
 
 	def checkphone(self,phonestr):
 		if len(phonestr) == 10:
-			print 'too short!'
+			print 'No country code! Add one for Taiwan number'
 			newphone = '+886' + phonestr[1:]
 		else:
 			newphone = phonestr
@@ -86,5 +86,5 @@ class smsparser(object):
 			ET.SubElement(root,'sms', sms)
 
 		tree = ET.ElementTree(root)
-		# Add encoding parameter to indicate utf-8, solve encoding problem
+		# By adding encoding = utf-8, I let ElementTree expect utf-8 incoming
 		tree.write(xmlname, encoding='utf-8')
