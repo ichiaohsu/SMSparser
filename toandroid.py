@@ -1,9 +1,11 @@
 # -*- coding: utf8 -*-
-import csv
 from sys import exit
 from datetime import datetime
 import time
+
+import csv
 import sqlite3
+import xml.etree.ElementTree as ET
 
 class smsparser(object):
 
@@ -45,7 +47,7 @@ class smsparser(object):
 				print row['snt_number']
 				phone_number = self.checkphone(row['snt_number'])
 				sms_type = '2'
-			#print phone_number
+			print phone_number
 
 			# from csv string to datetime obj
 			date_object = datetime.strptime(row["date/time"], '%Y.%m.%d %H:%M')
@@ -54,23 +56,34 @@ class smsparser(object):
 				date_str = datetime.strftime(date_object,'%Y年%m月%d日 下午%I:%M:00')
 			else:
 				date_str = datetime.strftime(date_object,'%Y年%m月%d日 上午%I:%M:00')
-			#print date_str
+			print date_str
 
 			# Create timestamp for sent time and receive time in ms
 			sent_time = int( time.mktime( date_object.timetuple() ) )*1000
 			receive_time = sent_time + 1000
-			#print "sent: ", sent_time, ", receive: ", receive_time
+			print "sent: ", sent_time, ", receive: ", receive_time
+
+			print type(date_str)
+			print type(row['date/time'])
 
 			self.smses.append({
+				'protocol': '0',
 				'address': phone_number,
 				'date': str(receive_time),
 				'type': sms_type,
-				'body': row['message'],
+				'subject': 'null',
+				'body': row['message'].decode('utf-8'),
+				'toa': 'null',
+				'sc_toa': 'null',
 				'service_center': phone_number,
+				'read': '1',
+				'status': '-1',
+				'locked': '0',
 				'date_sent': str(sent_time),
-				'readable_date': date_str
+				'readable_date': date_str.decode('utf-8'),
+				'contact_name': '(Unknown)'
 			})
-
+		#print self.smses
 			#thread_id = 295
 			#data = [
 			#	[date_str,phone_number,phone_number,msg_type,row["message"],str(thread_id),"null",str(sent_time),str(receive_time),
@@ -79,7 +92,17 @@ class smsparser(object):
 
 			#thread_id = thread_id + 1
 
-		print self.smses
+	def convertxml(self):
+		print 'convertxml...'
+		xmlname = raw_input('Enter the desired xml output name - ')
+		root = ET.Element('smses')
+
+		for sms in self.smses:
+
+			ET.SubElement(root,'sms', sms)
+		tree = ET.ElementTree(root)
+		# Add encoding parameter to indicate utf-8, solve encoding problem
+		tree.write(xmlname, encoding='utf-8')
 '''
 def getData():
 	print 'getData'
