@@ -8,6 +8,7 @@ import sqlite3
 class smsparser(object):
 
 	def __init__(self):
+		self.smses = list()
 		self.dbname = 'smsdb.sqlite'
 		print 'csvparser init...'
 
@@ -39,10 +40,12 @@ class smsparser(object):
 			# Decide message type
 			if row["type"] == "deliver":
 				phone_number = self.checkphone(row['rcv_number'])
+				sms_type = '1'
 			elif row["type"] == "submit":
 				print row['snt_number']
 				phone_number = self.checkphone(row['snt_number'])
-			print phone_number
+				sms_type = '2'
+			#print phone_number
 
 			# from csv string to datetime obj
 			date_object = datetime.strptime(row["date/time"], '%Y.%m.%d %H:%M')
@@ -51,12 +54,22 @@ class smsparser(object):
 				date_str = datetime.strftime(date_object,'%Y年%m月%d日 下午%I:%M:00')
 			else:
 				date_str = datetime.strftime(date_object,'%Y年%m月%d日 上午%I:%M:00')
-			print date_str
+			#print date_str
 
 			# Create timestamp for sent time and receive time in ms
 			sent_time = int( time.mktime( date_object.timetuple() ) )*1000
 			receive_time = sent_time + 1000
-			print "sent: ", sent_time, ", receive: ", receive_time
+			#print "sent: ", sent_time, ", receive: ", receive_time
+
+			self.smses.append({
+				'address': phone_number,
+				'date': str(receive_time),
+				'type': sms_type,
+				'body': row['message'],
+				'service_center': phone_number,
+				'date_sent': str(sent_time),
+				'readable_date': date_str
+			})
 
 			#thread_id = 295
 			#data = [
@@ -66,6 +79,7 @@ class smsparser(object):
 
 			#thread_id = thread_id + 1
 
+		print self.smses
 '''
 def getData():
 	print 'getData'
