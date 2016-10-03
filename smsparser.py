@@ -8,33 +8,35 @@ import xml.etree.ElementTree as ET
 
 from et_prettify import prettify
 
-class smsparser(object):
+class parser(object):
 
 	def __init__(self):
 		self.smses = list()
-		print 'csvparser init...'
+		print('csvparser init...')
 
 	def checkphone(self,phonestr):
+		"""Check if the phone number has country code"""
 		if len(phonestr) == 10:
-			print 'No country code! Add one for Taiwan number'
+			print('No country code! Add one for Taiwan number')
 			newphone = '+886' + phonestr[1:]
 		else:
 			newphone = phonestr
 		return newphone
 
 	def readcsv(self):
-		print 'readcsv...'
+		"""Read in the csv files"""
+		print('readcsv...')
 
-		csvname = raw_input("Enter file name to input - ")
+		csvname = input("Enter file name to input - ")
 
 		if len(csvname) > 1:
-			self.rf = open(csvname,'rb')
+			self.rf = open(csvname,'r')
 		else:
-			print "invalid file name"
+			print("invalid file name")
 			exit(0)
 
 	def parsecsv(self):
-
+		"""Parse csv columns to a dict"""
 		for row in csv.DictReader(self.rf,["sms","type","rcv_number","snt_number","","date/time","group","message"]):
 
 			# Decide message type
@@ -44,15 +46,15 @@ class smsparser(object):
 			elif row["type"] == "submit":
 				phone_number = self.checkphone(row['snt_number'])
 				sms_type = '2'
-			print phone_number
+			print(phone_number)
 
 			# from csv string to datetime obj
-			date_object = datetime.strptime(row["date/time"], '%Y.%m.%d %H:%M:%S')
+			date_object = datetime.strptime(row["date/time"], '%Y.%m.%d %H:%M')
 			# Split into 12hour and Mandarin am/pm indication
 			if date_object.hour > 12:
-				date_str = datetime.strftime(date_object,'%Y年%m月%d日 下午%I:%M:%S')
+				date_str = datetime.strftime(date_object,'%Y年%m月%d日 下午%I:%M')
 			else:
-				date_str = datetime.strftime(date_object,'%Y年%m月%d日 上午%I:%M:%S')
+				date_str = datetime.strftime(date_object,'%Y年%m月%d日 上午%I:%M')
 
 			# Create timestamp for sent time and receive time in ms
 			sent_time = int( time.mktime( date_object.timetuple() ) )*1000
@@ -65,7 +67,7 @@ class smsparser(object):
 				'date': str(receive_time),
 				'type': sms_type,
 				'subject': 'null',
-				'body': row['message'].decode('utf-8'),
+				'body': row['message'],
 				'toa': 'null',
 				'sc_toa': 'null',
 				'service_center': phone_number,
@@ -73,13 +75,14 @@ class smsparser(object):
 				'status': '-1',
 				'locked': '0',
 				'date_sent': str(sent_time),
-				'readable_date': date_str.decode('utf-8'),
+				'readable_date': date_str,
 				'contact_name': '(Unknown)'
 			})
 
 	def convertxml(self):
-		print 'convertxml...'
-		xmlname = raw_input('Enter the desired xml output name - ')
+		"""Read the dictionary storing csv data and convert them into xml tree"""
+		print('convertxml...')
+		xmlname = input('Enter the desired xml output name - ')
 
 		root = ET.Element('smses')
 
@@ -87,7 +90,7 @@ class smsparser(object):
 
 			ET.SubElement(root,'sms', sms)
 
-		print prettify(root)
+		print(prettify(root))
 		tree = ET.ElementTree(root)
 		# By adding encoding = utf-8, I let ElementTree expect utf-8 incoming
 		tree.write(xmlname, encoding='utf-8')

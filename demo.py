@@ -1,6 +1,6 @@
 import smsparser
 
-toa = smsparser.smsparser()
+toa = smsparser.parser()
 
 toa.readcsv()
 toa.parsecsv()
