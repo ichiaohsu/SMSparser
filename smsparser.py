@@ -45,14 +45,14 @@ class smsparser(object):
 				phone_number = self.checkphone(row['snt_number'])
 				sms_type = '2'
 			print phone_number
-			
+
 			# from csv string to datetime obj
-			date_object = datetime.strptime(row["date/time"], '%Y.%m.%d %H:%M')
+			date_object = datetime.strptime(row["date/time"], '%Y.%m.%d %H:%M:%S')
 			# Split into 12hour and Mandarin am/pm indication
 			if date_object.hour > 12:
-				date_str = datetime.strftime(date_object,'%Y年%m月%d日 下午%I:%M:00')
+				date_str = datetime.strftime(date_object,'%Y年%m月%d日 下午%I:%M:%S')
 			else:
-				date_str = datetime.strftime(date_object,'%Y年%m月%d日 上午%I:%M:00')
+				date_str = datetime.strftime(date_object,'%Y年%m月%d日 上午%I:%M:%S')
 
 			# Create timestamp for sent time and receive time in ms
 			sent_time = int( time.mktime( date_object.timetuple() ) )*1000
